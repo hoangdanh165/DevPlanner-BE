@@ -160,19 +160,21 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
 
 # AWS BUCKET
-# AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-# AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-# AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-# AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME')
-# AWS_S3_FILE_OVERWRITE = False
-# AWS_DEFAULT_ACL = None
-# AWS_S3_VERIFY = True
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_S3_VERIFY = True
 
-# AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+AWS_S3_CUSTOM_DOMAIN = (
+    f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+)
 
-# MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-# STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-# TEMPLATES_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/templates/'
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+TEMPLATES_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/templates/"
 
 
 # GOOGLE BUCKET
@@ -203,12 +205,12 @@ MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/{MEDIAFILES_LOCATI
 
 # STORAGE DEFINITIONS
 STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-    },
+    # "default": {
+    #     "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+    # },
+    # "staticfiles": {
+    #     "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+    # },
     # "default": {
     #     "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
     #     "OPTIONS": {
@@ -221,18 +223,18 @@ STORAGES = {
     #         "verify": AWS_S3_VERIFY,
     #     },
     # },
-    # "staticfiles": {
-    #     "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
-    #     "OPTIONS": {
-    #         "bucket_name": AWS_STORAGE_BUCKET_NAME,
-    #         "access_key": AWS_ACCESS_KEY_ID,
-    #         "secret_key": AWS_SECRET_ACCESS_KEY,
-    #         "region_name": AWS_S3_REGION_NAME,
-    #         "file_overwrite": AWS_S3_FILE_OVERWRITE,
-    #         "default_acl": AWS_DEFAULT_ACL,
-    #         "verify": AWS_S3_VERIFY,
-    #     },
-    # },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+        "OPTIONS": {
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "access_key": AWS_ACCESS_KEY_ID,
+            "secret_key": AWS_SECRET_ACCESS_KEY,
+            "region_name": AWS_S3_REGION_NAME,
+            "file_overwrite": AWS_S3_FILE_OVERWRITE,
+            "default_acl": AWS_DEFAULT_ACL,
+            "verify": AWS_S3_VERIFY,
+        },
+    },
 }
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")

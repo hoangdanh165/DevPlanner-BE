@@ -29,6 +29,8 @@ from ..serializers.user import StaffSerializer
 from django.db.models.functions import TruncMonth, TruncDate
 from django.utils.timezone import now
 from django.db.models import Count, Q
+from core.utils.response import success_response, error_response
+
 
 from ..services.user import (
     verify_token,
@@ -188,7 +190,7 @@ class UserViewSet(viewsets.ModelViewSet):
         data = request.data.copy()
 
         if "role" not in data or not data["role"]:
-            data["role"] = {"name": "customer"}
+            data["role"] = {"name": "user"}
 
         serializer = UserAccountSerializer(data=data)
 
@@ -196,12 +198,13 @@ class UserViewSet(viewsets.ModelViewSet):
             user = serializer.save()
             send_verification_email(user)
 
-            return Response(
-                {"detail": "Account created successfully, please check your email!"},
-                status=status.HTTP_201_CREATED,
+            return success_response(
+                None,
+                "Account created successfully, please check your email!",
+                status=201,
             )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("Validation failed", errors=serializer.errors)
 
     @action(
         methods=["post"],
