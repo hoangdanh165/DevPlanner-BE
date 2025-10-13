@@ -1,0 +1,106 @@
+# ===============================
+# 🐍 Python
+# ===============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pkl
+
+# ===============================
+# 🧱 Django
+# ===============================
+*.log
+*.pot
+*.py,cover
+*.mo
+db.sqlite3
+db.sqlite3-journal
+
+# Static & media (tạo lại được khi deploy)
+staticfiles/
+static/
+media/
+build/
+dist/
+
+# Nếu bạn muốn bỏ qua migrations (KHÔNG khuyến khích nếu team project)
+# */migrations/
+# !*/migrations/__init__.py
+
+# ===============================
+# ⚙️ Environment & Secrets
+# ===============================
+config.env
+.env
+.env.local
+.env.*.local
+config.env
+*.ini
+*.cfg
+*.secret.json
+
+# ===============================
+# 💾 Virtual Environments
+# ===============================
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ===============================
+# 🧩 IDE / Editor
+# ===============================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ===============================
+# 🧪 Testing & Coverage
+# ===============================
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+*.cover
+*,cover
+
+# ===============================
+# 🧠 Type Checking
+# ===============================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# ===============================
+# 🐳 Docker
+# ===============================
+*.pid
+*.pid.lock
+docker-compose.override.yml
+.docker/
+docker_logs/
+.dockerignore
+
+# ===============================
+# 💡 JetBrains
+# ===============================
+.idea/
+*.iml
+
+# ===============================
+# 💾 Backup / Temp
+# ===============================
+*.bak
+*.swp
+*.swo
+*.tmp
+*.temp
