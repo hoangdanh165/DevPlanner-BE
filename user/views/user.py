@@ -26,7 +26,6 @@ from ..serializers.user import (
 )
 from ..models import User, UserResetPassword
 from ..serializers.user import StaffSerializer
-from chat.models.conversation import Conversation
 from django.db.models.functions import TruncMonth, TruncDate
 from django.utils.timezone import now
 from django.db.models import Count, Q
@@ -35,8 +34,6 @@ from ..services.user import (
     verify_token,
     send_verification_email,
     send_password_reset_email,
-    send_sms,
-    verify_sms_code,
 )
 from ..permissions import (
     IsAdmin,
@@ -708,56 +705,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(
         methods=["get"],
-        url_path="get-staff",
-        detail=False,
-        permission_classes=[IsAuthenticated],
-        renderer_classes=[renderers.JSONRenderer],
-    )
-    def get_staff(self, request):
-        current_user = request.user.id
-
-        conversations_subquery = (
-            Conversation.objects.filter(participants=current_user)
-            .filter(participants=OuterRef("pk"))
-            .values("id")
-        )
-
-        staffs = (
-            User.objects.filter(role__name__in=["admin", "sale"])
-            .annotate(had_conversation=Exists(conversations_subquery))
-            .exclude(id=current_user)
-        )
-
-        serializer = StaffSerializer(staffs, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(
-        methods=["get"],
-        url_path="get-all-users",
-        detail=False,
-        permission_classes=[IsAuthenticated],
-        renderer_classes=[renderers.JSONRenderer],
-    )
-    def get_all_users_except_self(self, request):
-        current_user = request.user.id
-
-        conversations_subquery = (
-            Conversation.objects.filter(participants=current_user)
-            .filter(participants=OuterRef("pk"))
-            .values("id")
-        )
-
-        all_users = User.objects.exclude(id=current_user).annotate(
-            had_conversation=Exists(conversations_subquery)
-        )
-
-        serializer = StaffSerializer(all_users, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(
-        methods=["get"],
         url_path="get-all",
         detail=False,
         permission_classes=[IsAdmin],
@@ -768,90 +715,3 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(users, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(
-        methods=["get"],
-        url_path="get-customers",
-        detail=False,
-        permission_classes=[IsAuthenticated],
-        renderer_classes=[renderers.JSONRenderer],
-    )
-    def get_customers(self, request):
-
-        customers = User.objects.filter(role__name="customer")
-
-        serializer = UserInfoSerializer(customers, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="stats/customers-last-30-days",
-        permission_classes=[IsAuthenticated],
-        renderer_classes=[renderers.JSONRenderer],
-    )
-    def customers_last_30_days(self, request):
-        from datetime import timedelta
-
-        today = now().date()
-        start_date = today - timedelta(days=29)
-
-        customers_per_day = (
-            User.objects.filter(role__name="customer", create_at__date__gte=start_date)
-            .annotate(day=TruncDate("create_at"))
-            .values("day")
-            .annotate(count=Count("id"))
-            .order_by("day")
-        )
-
-        date_to_count = {entry["day"]: entry["count"] for entry in customers_per_day}
-
-        data = []
-        for i in range(30):
-            day = start_date + timedelta(days=i)
-            data.append(date_to_count.get(day, 0))
-
-        response_data = {
-            "month": today.month,
-            "year": today.year,
-            "title": "New customers",
-            "value": sum(data),
-            "interval": "Last 30 days",
-            "data": data,
-            "trend": "up" if data[-1] > data[0] else "down",
-        }
-        return Response(response_data)
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="stats/top-customers",
-        permission_classes=[IsAuthenticated],
-        renderer_classes=[renderers.JSONRenderer],
-    )
-    def top_customers(self, request):
-        customers = (
-            User.objects.filter(role__name="customer")
-            .annotate(
-                appointment_count=Count(
-                    "appointments", filter=Q(appointments__status="completed")
-                )
-            )
-            .order_by("-appointment_count")
-        )
-
-        result = [
-            {
-                "id": customer.id,
-                "avatar": customer.get_avatar(),
-                "full_name": customer.full_name,
-                "email": customer.email,
-                "phone": customer.phone,
-                "address": customer.address,
-                "appointment_count": customer.appointment_count,
-            }
-            for customer in customers
-        ]
-
-        return Response(result)
