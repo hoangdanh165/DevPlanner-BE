@@ -25,8 +25,8 @@ User = get_user_model()
 
 def create_roles():
     roles = [
-        {"name": "admin", "permissions": {}},
         {"name": "user", "permissions": {}},
+        {"name": "admin", "permissions": {}},
     ]
     for role_data in roles:
         Role.objects.create(**role_data)
@@ -34,7 +34,7 @@ def create_roles():
 
 def create_users():
     emails = [
-        "hoangdanh.165@gmail.com",
+        "danh.le@rikai.technology",
     ]
 
     emails_user = [

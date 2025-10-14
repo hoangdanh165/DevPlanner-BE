@@ -627,6 +627,160 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(
         methods=["post"],
+        url_path="sign-in-with-github",
+        detail=False,
+        permission_classes=[AllowAny],
+        renderer_classes=[renderers.JSONRenderer],
+    )
+    def sign_in_with_github(self, request):
+        code = request.data.get("code")
+
+        if not code:
+            return Response({"error": "Missing authorization code"}, status=400)
+
+        # ==============================
+        # 1️⃣ Exchange code for access_token
+        # ==============================
+        token_url = "https://github.com/login/oauth/access_token"
+        payload = {
+            "client_id": settings.GITHUB_CLIENT_ID,
+            "client_secret": settings.GITHUB_CLIENT_SECRET,
+            "code": code,
+        }
+        headers = {"Accept": "application/json"}
+
+        token_response = requests.post(token_url, json=payload, headers=headers)
+        if token_response.status_code != 200:
+            return Response({"error": "Failed to get access token"}, status=400)
+
+        token_data = token_response.json()
+        access_token = token_data.get("access_token")
+
+        if not access_token:
+            return Response({"error": "Invalid access token response"}, status=400)
+
+        # ==============================
+        # 2️⃣ Get GitHub user info
+        # ==============================
+        user_info_url = "https://api.github.com/user"
+        email_info_url = "https://api.github.com/user/emails"
+
+        user_info = requests.get(
+            user_info_url, headers={"Authorization": f"Bearer {access_token}"}
+        ).json()
+        email_info = requests.get(
+            email_info_url, headers={"Authorization": f"Bearer {access_token}"}
+        ).json()
+
+        # Lấy email chính xác (verified hoặc primary)
+        primary_email = None
+        if isinstance(email_info, list):
+            for item in email_info:
+                if item.get("primary") and item.get("verified"):
+                    primary_email = item.get("email")
+                    break
+
+        # Lấy thông tin cơ bản
+        github_id = user_info.get("id")
+        username = user_info.get("login")
+        avatar = user_info.get("avatar_url")
+        name = user_info.get("name") or username
+        email = primary_email or user_info.get("email")
+
+        if not email:
+            return Response({"error": "Email not available from GitHub"}, status=400)
+
+        # # ==============================
+        # # 5️⃣ Get user repositories
+        # # ==============================
+        # repos_url = "https://api.github.com/user/repos?per_page=50&sort=updated"
+        # repos_response = requests.get(
+        #     repos_url, headers={"Authorization": f"Bearer {access_token}"}
+        # )
+
+        # if repos_response.status_code == 200:
+        #     repos_data = repos_response.json()
+        # else:
+        #     repos_data = []
+
+        # # Chọn các trường cần thiết để lưu/gợi ý
+        # user_repos = []
+        # for repo in repos_data:
+        #     user_repos.append(
+        #         {
+        #             "name": repo.get("name"),
+        #             "description": repo.get("description"),
+        #             "language": repo.get("language"),
+        #             "topics": repo.get("topics", []),
+        #             "stargazers_count": repo.get("stargazers_count"),
+        #             "forks_count": repo.get("forks_count"),
+        #             "html_url": repo.get("html_url"),
+        #             "updated_at": repo.get("updated_at"),
+        #         }
+        #     )
+
+        # print("User Repos:", user_repos)
+        # TO-DO: Save user repos's information to database or suggest ideas based on these recent repos
+        # ==============================
+        # 3️⃣ Create or update user
+        # ==============================
+        user = User.objects.filter(github_id=github_id).first()
+
+        if user:
+            if user.email != email:
+                user.email = email
+                user.save()
+        else:
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    "full_name": name,
+                    "avatar_url": avatar,
+                    "github_id": github_id,
+                    "email_verified": True,
+                },
+            )
+            if not created:
+                user.github_id = github_id
+                user.avatar_url = avatar
+                user.full_name = name
+                user.email_verified = True
+                user.save()
+
+        # ==============================
+        # 4️⃣ Issue JWT tokens
+        # ==============================
+        refresh = RefreshToken.for_user(user)
+        access_token_jwt = str(refresh.access_token)
+        refresh_token_jwt = str(refresh)
+
+        response = Response(
+            {
+                "userId": user.id,
+                "accessToken": access_token_jwt,
+                "refreshToken": refresh_token_jwt,
+                "role": user.role.name if hasattr(user, "role") else None,
+                "status": user.status if hasattr(user, "status") else None,
+                "avatar": avatar,
+                "fullName": user.full_name,
+                "email": user.email,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+        response.set_cookie(
+            key="refreshToken",
+            value=refresh_token_jwt,
+            httponly=True,
+            secure=True,
+            samesite="None",
+            max_age=24 * 60 * 60,
+        )
+
+        return response
+
+    @action(
+        methods=["post"],
         url_path="refresh",
         detail=False,
         permission_classes=[AllowAny],

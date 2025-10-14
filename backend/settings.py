@@ -36,13 +36,13 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 CORS_EXPOSE_HEADERS = ["Cross-Origin-Opener-Policy"]
 
 INSTALLED_APPS = [
+    "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -129,6 +129,9 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", "")
+GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "")
 
 # LANGUAGE & TIMEZONE
 LANGUAGE_CODE = "en-us"
@@ -281,3 +284,6 @@ CACHES = {
 }
 
 CACHE_TIMEOUT = 86400
+
+# GIT
+ACCOUNT_EMAIL_REQUIRED = True
