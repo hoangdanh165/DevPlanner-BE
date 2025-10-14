@@ -449,12 +449,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(
         methods=["post"],
-        url_path="log-out",
+        url_path="sign-out",
         detail=False,
         permission_classes=[IsAuthenticated],
         renderer_classes=[renderers.JSONRenderer],
     )
-    def log_out(self, request):
+    def sign_out(self, request):
         try:
             refresh_token = request.COOKIES.get("refreshToken")
 

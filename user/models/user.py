@@ -49,8 +49,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_phone(self):
         if self.phone:
             if self.phone.startswith("+84"):
-                return "0" + self.phone[3:]
-            return self.phone
+                return "0" + self.phone[3:].replace(" ", "")
+            return self.phone.replace(" ", "")
         return None
 
     def get_create_at(self):
