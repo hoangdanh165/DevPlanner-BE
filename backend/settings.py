@@ -47,6 +47,11 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "user",
+    "collaboration",
+    "exports",
+    "planner",
+    "tasks",
+    "ai_engine",
 ]
 
 

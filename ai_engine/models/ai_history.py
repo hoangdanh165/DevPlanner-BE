@@ -27,3 +27,6 @@ class AIHistory(models.Model):
 
     def __str__(self):
         return f"AI call ({self.model_name}) on {self.project.name}"
+
+    class Meta:
+        db_table = "ai_historys"

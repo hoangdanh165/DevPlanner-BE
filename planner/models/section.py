@@ -17,3 +17,6 @@ class Section(models.Model):
 
     def __str__(self):
         return f"{self.project.name} - {self.title}"
+
+    class Meta:
+        db_table = "section"

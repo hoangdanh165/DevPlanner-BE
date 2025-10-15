@@ -5,9 +5,11 @@ from django.db import models
 class ProjectTemplate(models.Model):
     CATEGORY_CHOICES = [
         ("webapp", "Web Application"),
-        ("mobile", "Mobile App"),
-        ("ai", "AI Project"),
+        ("mobile", "Mobile Application"),
+        ("ai/ml", "AI/ML Project"),
         ("data", "Data Project"),
+        ("developer_tool", "Developer Tool"),
+        ("automation_tool", "Automation Tool"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -20,3 +22,6 @@ class ProjectTemplate(models.Model):
 
     def __str__(self):
         return f"Template: {self.name}"
+
+    class Meta:
+        db_table = "project_template"

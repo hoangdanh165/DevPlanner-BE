@@ -11,3 +11,6 @@ class AICache(models.Model):
 
     def __str__(self):
         return f"Cache({self.model_name})"
+
+    class Meta:
+        db_table = "ai_cache"

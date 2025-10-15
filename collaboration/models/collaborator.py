@@ -23,6 +23,7 @@ class Collaborator(models.Model):
 
     class Meta:
         unique_together = ("project", "user")
+        db_table = "collaborator"
 
     def __str__(self):
         return f"{self.user.email} - {self.role} of {self.project.name}"

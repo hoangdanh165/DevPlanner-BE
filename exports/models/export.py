@@ -22,3 +22,6 @@ class Export(models.Model):
 
     def __str__(self):
         return f"Export({self.export_type}) of {self.project.name}"
+
+    class Meta:
+        db_table = "export"

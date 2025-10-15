@@ -19,3 +19,6 @@ class AIAgent(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.role})"
+
+    class Meta:
+        db_table = "ai_agents"
