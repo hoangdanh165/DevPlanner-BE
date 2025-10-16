@@ -278,12 +278,12 @@ REDIS_URL = os.environ.get("REDIS_EXTERNAL_URL")
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get("REDIS_EXTERNAL_URL"),
+        "LOCATION": os.environ.get("REDIS_EXTERNAL_URL", "redis://localhost:6379/1"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": {
-                "ssl_cert_reqs": None,
-            },
+            # "CONNECTION_POOL_KWARGS": {
+            #     "ssl_cert_reqs": None,
+            # },
         },
     }
 }
@@ -292,3 +292,18 @@ CACHE_TIMEOUT = 86400
 
 # GIT
 ACCOUNT_EMAIL_REQUIRED = True
+
+# CELERY SETTINGS
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/3")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/3")
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Ho_Chi_Minh"
+CELERY_ENABLE_UTC = False
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+# Pub/Sub settings
+REDIS_PS_URL = os.getenv("REDIS_PS_URL", "redis://localhost:6379/2")
+
+UPLOAD_PROGRESS_CHANNEL_PREFIX = "project:"

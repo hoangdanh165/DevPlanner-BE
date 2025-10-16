@@ -3,13 +3,27 @@ from rest_framework.response import Response
 
 def success_response(data=None, message="Success", status=200):
     return Response(
-        {"status": status, "message": message, "errors": None, "data": data},
-        status=status,
+        {
+            "success": {
+                "code": status,
+                "message": message,
+                "details": {
+                    "data": data,
+                },
+            }
+        }
     )
 
 
-def error_response(message="Error", errors=None, status=400):
+def error_response(errors=None, message="Error", status=400):
     return Response(
-        {"status": status, "message": message, "errors": errors, "data": None},
-        status=status,
+        {
+            "error": {
+                "code": status,
+                "message": message,
+                "details": {
+                    "data": errors,
+                },
+            }
+        }
     )
