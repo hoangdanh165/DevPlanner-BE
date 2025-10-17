@@ -36,7 +36,13 @@ prompt_templates = {
         - Be realistic and modular — features should map well to tasks later.
 
         ## Output Format
-        Return JSON in this format:
+        Return JSON and JSON only, no markdown, ... and in this format (no code block markdown like: 
+        ```json
+        {{
+        "frontend": [...],
+        "backend": [...]
+        }}
+        ```):
         {{
         "features": [
             {{ "name": "", "description": "", "priority": "" }}
@@ -60,7 +66,13 @@ prompt_templates = {
         - Include `justification` explaining *why* each stack element fits the project.
 
         ## Output Format
-        Return JSON in this format:
+        Return JSON and JSON only, no markdown, ... and in this format (no code block markdown like: 
+        ```json
+        {{
+        "frontend": [...],
+        "backend": [...]
+        }}
+        ```):
         {{
         "frontend": [{{ "tech": "", "reason": "" }}],
         "backend": [{{ "tech": "", "reason": "" }}],
@@ -89,7 +101,13 @@ prompt_templates = {
         - Avoid fictional deadlines, just group logically.
 
         ## Output Format
-        Return JSON:
+        Return JSON and JSON only, no markdown, ... and in this format (no code block markdown like: 
+        ```json
+        {{
+        "frontend": [...],
+        "backend": [...]
+        }}
+        ```):
         {{
             "milestones": [
                 {{

@@ -36,6 +36,7 @@ def run_pipeline_task(self, project_payload):
             publisher.publish(str(project_payload), "pipeline_failed", 0)
             return
 
+        publisher.publish(str(project_payload), "pipeline_started", 0)
         run_project_pipeline(project)
     except Exception as e:
         publisher.publish(str(project_payload), "pipeline_failed", 0)
