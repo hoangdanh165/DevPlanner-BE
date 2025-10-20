@@ -136,6 +136,9 @@ prompt_templates = {
         3. API Design summary
         4. Deployment & Configuration notes
         5. Future improvements
+        6. References — include real technical documents, articles, or papers related to the recommended tech stack.
+            - Format each reference as: **[Title](URL)** — Author(s), short description if applicable.
+            - Example: **[React Documentation](https://react.dev)** — Official React guide.
         - Avoid code — keep it conceptual and explanatory.
         - Write in concise, professional English.
 
