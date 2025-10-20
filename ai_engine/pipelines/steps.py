@@ -71,3 +71,57 @@ def generate_docs(project):
     text = generate_text(project_id=project_id, step="docs", prompt=prompt)
     save_section(project, "Docs", text, 3)
     return text
+
+
+def generate_diagrams_gantt(project):
+    context = load_context(project)
+    project_name = _project_attr(project, "name")
+    project_id = _project_attr(project, "id")
+    prompt = prompt_templates["diagrams"]["gantt_chart"].format(
+        project_name=project_name, context=context
+    )
+
+    text = generate_text(project_id=project_id, step="diagrams_gantt", prompt=prompt)
+    save_section(project, "Diagrams_gantt", text, 3)
+    return text
+
+
+def generate_diagrams_er(project):
+    context = load_context(project)
+    project_name = _project_attr(project, "name")
+    project_id = _project_attr(project, "id")
+    prompt = prompt_templates["diagrams"]["er_diagram"].format(
+        project_name=project_name, context=context
+    )
+
+    text = generate_text(project_id=project_id, step="diagrams_er", prompt=prompt)
+    save_section(project, "Diagrams_er", text, 3)
+    return text
+
+
+def generate_diagrams_architecture(project):
+    context = load_context(project)
+    project_name = _project_attr(project, "name")
+    project_id = _project_attr(project, "id")
+    prompt = prompt_templates["diagrams"]["architecture_diagram"].format(
+        project_name=project_name, context=context
+    )
+
+    text = generate_text(
+        project_id=project_id, step="diagrams_architecture", prompt=prompt
+    )
+    save_section(project, "Diagrams_architecture", text, 3)
+    return text
+
+
+def generate_diagrams_sequence(project):
+    context = load_context(project)
+    project_name = _project_attr(project, "name")
+    project_id = _project_attr(project, "id")
+    prompt = prompt_templates["diagrams"]["sequence_diagram"].format(
+        project_name=project_name, context=context
+    )
+
+    text = generate_text(project_id=project_id, step="diagrams_sequence", prompt=prompt)
+    save_section(project, "Diagrams_sequence", text, 3)
+    return text

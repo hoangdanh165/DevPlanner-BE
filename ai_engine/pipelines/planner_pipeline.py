@@ -4,6 +4,10 @@ from .steps import (
     generate_features,
     generate_tasks,
     generate_docs,
+    generate_diagrams_gantt,
+    generate_diagrams_er,
+    generate_diagrams_architecture,
+    generate_diagrams_sequence,
 )
 from .context_manager import load_context
 from ..services.pubsub import get_default_publisher
@@ -37,8 +41,23 @@ def run_project_pipeline(project):
     techstack_text = generate_tech_stack(project)
 
     pubisher.publish(pid, "tasks_start", None)
-    tasks_tech = generate_tasks(project)
-    print(tasks_tech)
+    tasks_text = generate_tasks(project)
+
+    # ======== DIAGRAMS ========
+
+    pubisher.publish(pid, "diagrams_gantt_start", None)
+    d_gantt_text = generate_diagrams_gantt(project)
+
+    pubisher.publish(pid, "diagrams_er_start", None)
+    d_er_text = generate_diagrams_er(project)
+
+    pubisher.publish(pid, "diagrams_architecture_start", None)
+    d_architecture_text = generate_diagrams_architecture(project)
+
+    pubisher.publish(pid, "diagrams_sequence_start", None)
+    d_sequence_text = generate_diagrams_sequence(project)
+
+    # ======== DIAGRAMS END ========
 
     pubisher.publish(pid, "docs_start", None)
     techstack_text = generate_docs(project)
