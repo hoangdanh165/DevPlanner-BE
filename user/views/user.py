@@ -37,10 +37,8 @@ from ..services.user import (
     send_verification_email,
     send_password_reset_email,
 )
-from ..permissions import (
+from core.permissions import (
     IsAdmin,
-    IsCustomer,
-    IsSale,
 )
 
 CLIENT_ID = os.environ.get("CLIENT_ID")

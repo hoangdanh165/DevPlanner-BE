@@ -27,21 +27,21 @@ def load_context(project: Union[Project, dict]):
 
 def save_section(project: Union[Project, dict], title: str, content: str, order: int):
     """Create or update a section. For temporary projects, store sections in cache."""
-    if isinstance(project, dict) and project.get("temp"):
-        key = f"temp_project_sections:{project.get('id')}"
-        sections = cache.get(key) or []
-        # replace if title exists
-        existing = next((s for s in sections if s.get("title") == title), None)
-        if existing:
-            existing["content"] = content
-            existing["order_index"] = order
-        else:
-            sections.append({"title": title, "content": content, "order_index": order})
-        cache.set(key, sections, None)
-        return
+    # if isinstance(project, dict) and project.get("temp"):
+    #     key = f"temp_project_sections:{project.get('id')}"
+    #     sections = cache.get(key) or []
+    #     # replace if title exists
+    #     existing = next((s for s in sections if s.get("title") == title), None)
+    #     if existing:
+    #         existing["content"] = content
+    #         existing["order_index"] = order
+    #     else:
+    #         sections.append({"title": title, "content": content, "order_index": order})
+    #     cache.set(key, sections, None)
+    #     return
 
     Section.objects.update_or_create(
-        project=project,
+        project=Project.objects.get(id=project.get("id")),
         title=title,
         defaults={
             "order_index": order,

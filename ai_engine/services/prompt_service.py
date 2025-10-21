@@ -4,8 +4,8 @@ prompt_templates = {
         Your task is to write a clear, compelling overview of a software project.
 
         ## Context
-        Project name: {project_name}
-        Description (if provided): "{description}"
+        Project name: $project_name
+        Description (if provided): $description
 
         ## Instructions
         - Summarize the purpose and vision of the project.
@@ -22,9 +22,9 @@ prompt_templates = {
         Generate a structured list of key product features for this project.
 
         ## Context
-        Project name: {project_name}
+        Project name: $project_name
         Related things:
-        {context}
+        $context
 
         ## Instructions
         - Derive 5–8 meaningful, user-facing features from the overview.
@@ -38,25 +38,25 @@ prompt_templates = {
         ## Output Format
         Return JSON and JSON only, no markdown, ... and in this format (no code block markdown like: 
         ```json
-        {{
+        {
         "frontend": [...],
         "backend": [...]
-        }}
+        }
         ```):
-        {{
+        {
         "features": [
-            {{ "name": "", "description": "", "priority": "" }}
+            { "name": "", "description": "", "priority": "" }
         ]
-        }}
+        }
     """,
     "tech_stack": """
         You are a **senior full-stack software architect**.
         Propose the most suitable technology stack for the following project.
 
         ## Context
-        Project name: {project_name}
+        Project name: $project_name
         Related things:
-        {context}
+        $context
 
         ## Instructions
         - Recommend **frontend**, **backend**, **database**, **infrastructure**, and **AI/ML tools** (if relevant).
@@ -68,27 +68,27 @@ prompt_templates = {
         ## Output Format
         Return JSON and JSON only, no markdown, ... and in this format (no code block markdown like: 
         ```json
-        {{
+        {
         "frontend": [...],
         "backend": [...]
-        }}
+        }
         ```):
-        {{
-        "frontend": [{{ "tech": "", "reason": "" }}],
-        "backend": [{{ "tech": "", "reason": "" }}],
-        "database": [{{ "tech": "", "reason": "" }}],
-        "ai_services": [{{ "tech": "", "reason": "" }}],
-        "devops": [{{ "tech": "", "reason": "" }}]
-        }}
+        {
+        "frontend": [{ "tech": "", "reason": "" }],
+        "backend": [{ "tech": "", "reason": "" }],
+        "database": [{ "tech": "", "reason": "" }],
+        "ai_services": [{ "tech": "", "reason": "" }],
+        "devops": [{ "tech": "", "reason": "" }]
+        }
     """,
     "tasks": """
         You are a **technical project manager** and **Scrum planner**.
         Break down this project into actionable development tasks and milestones.
 
         ## Context
-        Project name: {project_name}
+        Project name: $project_name
         Related things:
-        {context}
+        $context
 
         ## Instructions
         - Organize tasks logically under milestones.
@@ -103,21 +103,21 @@ prompt_templates = {
         ## Output Format
         Return JSON and JSON only, no markdown, ... and in this format (no code block markdown like: 
         ```json
-        {{
+        {
         "frontend": [...],
         "backend": [...]
-        }}
+        }
         ```):
-        {{
+        {
             "milestones": [
-                {{
+                {
                 "name": "MVP Setup",
                 "tasks": [
-                    {{ "title": "", "description": "", "role": "", "priority": "" }}
+                    { "title": "", "description": "", "role": "", "priority": "" }
                 ]
-                }}
+                }
             ]
-        }}
+        }
     """,
     "docs": """
         You are a **technical writer** and **software documentation specialist**.
@@ -125,9 +125,9 @@ prompt_templates = {
         based on the project’s context.
 
         ## Context
-        Project name: {project_name}
+        Project name: $project_name
         Related things:
-        {context}
+        $context
 
         ## Instructions
         - Generate a well-structured Markdown document containing:
@@ -154,130 +154,125 @@ prompt_templates = {
     """,
     "diagrams": {
         "gantt_chart": """
-            You are a **project planner** and **timeline visualizer**.
+        You are a **project planner** and **timeline visualizer**.
 
-            Your task is to generate a **Mermaid Gantt chart** that visualizes the high-level schedule and dependencies of the project.
+        Your task is to generate a **Mermaid Gantt chart** that visualizes the high-level schedule and dependencies of the project.
 
-            ## Context
-            Project: {project_name}
-            Related things:
-            {context}
+        ## Context
+        Project name: $project_name
+        Related things:
+        $context
 
-            ## Requirements
-            - Use realistic phases like: Planning, Design, Development, Testing, Deployment.
-            - Include estimated durations and sequential dependencies.
-            - Group tasks logically (Frontend, Backend, AI, Infrastructure, etc.)
-            - Use proper Mermaid Gantt syntax with realistic time spacing.
+        ## Requirements
+        - Use Mermaid v11.x syntax!!
+        - Use realistic phases like: Planning, Design, Development, Testing, Deployment.
+        - Include estimated durations and sequential dependencies.
+        - Group tasks logically (Frontend, Backend, AI, Infrastructure, etc.)
+        - Use proper Mermaid Gantt syntax with realistic time spacing.
+        - The first line must start with `gantt` and include `title`, `dateFormat`, and `section` definitions.
+        - Do not include Markdown code fences or ```mermaid tags.
 
-            ## Output Format
-            Return **only** the Mermaid code block — nothing else.
+        ## Output Format
+        Return **only** the raw Mermaid Gantt code, nothing else (no explanations, no Markdown fences).
 
-            Example Output:
-            ```mermaid
-            gantt
-                title Project Development Timeline
-                dateFormat  YYYY-MM-DD
-                section Frontend
-                UI Design           :a1, 2025-01-01, 5d
-                Integration          :a2, after a1, 7d
-                section Backend
-                API Development      :b1, 2025-01-03, 10d
-                Auth System          :b2, after b1, 5d
-        """,
+        Example Output:
+        gantt
+            title A Gantt Diagram
+            dateFormat  YYYY-MM-DD
+            section Section
+            A task           :a1, 2014-01-01, 30d
+            Another task     :after a1  , 20d
+            section Another
+            Task in sec      :2014-01-12  , 12d
+            another task      : 24d
+    """,
         "er_diagram": """
-            You are a **database architect**.
+        You are a **database architect**.
 
-            Your task is to generate a **Mermaid Entity Relationship Diagram (ERD)** that clearly represents the data model of the project.
+        Your task is to generate a **Mermaid Entity Relationship Diagram (ERD)** that clearly represents the data model of the project.
 
-            ## Context
-            Project: {project_name}
-            Related things:
-            {context}
+        ## Context
+        Project name: $project_name
+        Related things:
+        $context
 
-            ## Requirements
-            - Use `erDiagram` syntax.
-            - Include entities (tables) with key attributes and relationships.
-            - Represent One-to-Many (||--o{), Many-to-Many ({--}), and One-to-One (||--||) correctly.
-            - Base the relationships logically on the context (e.g., Project → Section → Task).
+        ## Requirements
+        - Use Mermaid v11.x syntax!!
+        - Use `erDiagram` syntax.
+        - Include entities (tables) with key attributes and relationships.
+        - Represent One-to-Many (||--o{), Many-to-Many ({--}), and One-to-One (||--||) correctly.
+        - Base the relationships logically on the project context.
+        - Do not include Markdown code fences or ```mermaid tags.
 
-            ## Output Format
-            Return **only** the Mermaid code block — nothing else.
+        ## Output Format
+        Return **only** the raw Mermaid ERD code, nothing else.
 
-            Example Output:
-            ```mermaid
-            erDiagram
-                USER ||--o{ PROJECT : "creates"
-                PROJECT ||--o{ SECTION : "contains"
-                SECTION ||--o{ TASK : "includes"
-        """,
+        Example Output:
+        erDiagram
+            USER ||--o{ PROJECT : "creates"
+            PROJECT ||--o{ SECTION : "contains"
+            SECTION ||--o{ TASK : "includes"
+    """,
         "architecture_diagram": """
-            You are a **software architect**.
+        You are a **software architect**.
 
-            Your task is to generate a **high-level system architecture diagram** in Mermaid syntax.
+        Your task is to generate a **high-level system architecture diagram** using Mermaid syntax.
 
-            ## Context
-            Project: {project_name}
-            Tech Stack: {tech_stack}
-            Components: {components}
-            Description: {description}
+        ## Context
+        Project name: $project_name
+        Related things:
+        $context
 
-            ## Requirements
-            - Use `graph TD` syntax.
-            - Show how the main components interact: frontend, backend, database, AI services, external APIs, message brokers, etc.
-            - Include arrows to represent data flow or communication direction.
-            - Keep it simple, readable, and logically grouped.
+        ## Requirements
+        - Use Mermaid v11.x syntax!!
+        - Use `architecture-beta` syntax.
+        - Show how the main components interact: frontend, backend, database, AI services, external APIs, message brokers, etc.
+        - Keep it simple, readable, and logically grouped.
+        - Do not include Markdown code fences or ```mermaid tags.
 
-            ## Output Format
-            Return **only** the Mermaid code block — nothing else.
+        ## Output Format
+        Return **only** the raw Mermaid graph code, nothing else.
 
-            Example Output:
-            ```mermaid
-            graph TD
-            A[User Interface (Next.js)] --> B[Django REST API]
-            B --> C[PostgreSQL Database]
-            B --> D[Redis + Celery]
-            D --> E[Gemini/OpenAI API]
-            E --> B
-            B --> A
-        """,
+        Example Output:
+        architecture-beta
+            group api(cloud)[API]
+
+            service db(database)[Database] in api
+            service disk1(disk)[Storage] in api
+            service disk2(disk)[Storage] in api
+            service server(server)[Server] in api
+
+            db:L -- R:server
+            disk1:T -- B:server
+            disk2:T -- B:db
+    """,
         "sequence_diagram": """
-            You are a **software engineer** visualizing the main user flow.
+        You are a **software engineer** visualizing the main user flow.
 
-            Your task is to generate a **Mermaid sequence diagram** that shows the core interaction steps between key components of the system.
+        Your task is to generate a **Mermaid sequence diagram** that shows the core interaction steps between key components of the system.
 
-            ## Context
-            Project: {project_name}
-            Main Flow: {flow_description}
-            Tech Stack: {tech_stack}
+        ## Context
+        Project name: $project_name
+        Related things:
+        $context
 
-            ## Requirements
-            - Use `sequenceDiagram` syntax.
-            - Show the main interaction from user action to backend logic and AI response.
-            - Include key participants (User, Frontend, Backend, Database, Celery/Worker, AI API, WebSocket/Realtime server).
-            - Keep message names short and meaningful.
+        ## Requirements
+        - Use Mermaid v11.x syntax!!
+        - Use `sequenceDiagram` syntax.
+        - Show the main interaction from user action to backend logic and AI response.
+        - Include key participants (User, Frontend, Backend, Database, Celery/Worker, AI API, WebSocket/Realtime server).
+        - Keep message names short and meaningful.
+        - Do not include Markdown code fences or ```mermaid tags.
 
-            ## Output Format
-            Return **only** the Mermaid code block — nothing else.
+        ## Output Format
+        Return **only** the raw Mermaid sequence diagram code, nothing else.
 
-            Example Output:
-            ```mermaid
-            sequenceDiagram
-            participant U as User
-            participant F as Frontend (Next.js)
-            participant B as Backend (Django API)
-            participant C as Celery Worker
-            participant A as AI Service (Gemini/OpenAI)
-            participant W as WebSocket Server
-
-            U->>F: Click "Generate Plan"
-            F->>B: POST /ai/generate-plan
-            B->>C: Queue task via Celery
-            C->>A: Request plan from LLM
-            A-->>C: Return generated plan
-            C-->>B: Task complete
-            B-->>W: Emit progress/status
-            W-->>F: Realtime updates
-            F-->>U: Show plan results
-        """,
+        Example Output:
+        sequenceDiagram
+            Alice->>+John: Hello John, how are you?
+            Alice->>+John: John, can you hear me?
+            John-->>-Alice: Hi Alice, I can hear you!
+            John-->>-Alice: I feel great!
+    """,
     },
 }

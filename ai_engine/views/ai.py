@@ -29,14 +29,14 @@ CLIENT_ID = os.environ.get("CLIENT_ID")
 class AIViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all().order_by("id")
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     # serializer_class = UserSerializer
 
     @action(
         detail=False,
         url_path="generate-plan",
         methods=["post"],
-        permission_classes=[AllowAny],
+        permission_classes=[IsAuthenticated],
         renderer_classes=[renderers.JSONRenderer],
     )
     def generate_plan(self, request):
@@ -54,16 +54,31 @@ class AIViewSet(viewsets.ModelViewSet):
                     status=400,
                 )
 
-            # create a temp project payload and store in cache so user can save later
-            temp_key = f"temp_project:{project_id}"
+            # Save straight to database
+
+            # temp_key = f"temp_project:{project_id}"
+            # project_payload = {
+            #     "id": str(project_id),
+            #     "name": project_name,
+            #     "description": description,
+            #     "temp": True,
+            # }
+            # # store without expiry (TTL: 24h)
+            # cache.set(temp_key, project_payload, timeout=24 * 60 * 60)
+
+            Project.objects.get_or_create(
+                id=project_id,
+                user=request.user,
+                name=project_name,
+                description=description,
+            )
+
             project_payload = {
                 "id": str(project_id),
                 "name": project_name,
                 "description": description,
                 "temp": True,
             }
-            # store without expiry (TTL: 24h)
-            cache.set(temp_key, project_payload, timeout=24 * 60 * 60)
 
             # enqueue the pipeline task with the payload
             run_pipeline_task.delay(project_payload)

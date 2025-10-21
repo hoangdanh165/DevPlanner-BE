@@ -5,4 +5,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("user.urls")),
     path("", include("ai_engine.urls")),
+    path("", include("planner.urls")),
 ]

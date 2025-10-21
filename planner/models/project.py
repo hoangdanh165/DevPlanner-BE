@@ -19,6 +19,7 @@ class Project(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    version = models.CharField(max_length=50, default="v1")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="draft")
     tags = models.JSONField(default=list)
     sections_json = models.JSONField(default=dict)

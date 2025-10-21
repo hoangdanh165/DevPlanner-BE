@@ -290,6 +290,61 @@ CACHES = {
 
 CACHE_TIMEOUT = 86400
 
+# LOGGING
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": ("[{levelname}] {asctime} | {name}:{lineno} | {message}"),
+            "style": "{",
+        },
+        "simple": {"format": "[{levelname}] {message}", "style": "{"},
+    },
+    "handlers": {
+        # Ghi log ra console (dùng khi debug, docker, gunicorn...)
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        # Ghi log ra file
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/django.log"),
+            "formatter": "verbose",
+        },
+        # Ghi log lỗi riêng
+        "error_file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/errors.log"),
+            "formatter": "verbose",
+            "level": "ERROR",
+        },
+    },
+    "root": {  # logger gốc cho toàn project
+        "handlers": ["console", "file", "error_file"],
+        "level": "DEBUG" if os.environ.get("DEBUG", "True") == "True" else "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "django.request": {
+            "handlers": ["error_file"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        # logger cho app riêng (vd: ai_engine)
+        "ai_engine": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+}
+
 # GIT
 ACCOUNT_EMAIL_REQUIRED = True
 
