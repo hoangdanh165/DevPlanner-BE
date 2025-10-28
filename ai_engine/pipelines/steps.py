@@ -140,6 +140,6 @@ def generate_docs(project):
     prompt = prompt_template.substitute(project_name=project_name, context=context)
 
     text = generate_text(project_id=project_id, step="docs", prompt=prompt)
-    logger.error(text)
+
     save_section(project, "Docs", text, 9)
     return text

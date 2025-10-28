@@ -22,11 +22,14 @@ from core.utils.custom_pagination import CustomPaginationProject
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all().order_by("id")
+    # queryset = Project.objects.all().order_by("id")
 
     permission_classes = [IsAuthenticated]
-    serializer_class = ProjectListSerializer
+    serializer_class = ProjectDetailSerializer
     pagination_class = CustomPaginationProject
+
+    def get_queryset(self):
+        return Project.objects.filter(user=self.request.user).order_by("-created_at")
 
     @action(
         detail=False,
@@ -53,6 +56,69 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return success_response(
             data=serializer.data,
             meta=meta,
-            message="Projects retrieved successfully",
+            message="Project plans retrieved successfully",
+            status=200,
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="detail",
+        permission_classes=[IsAuthenticated],
+        renderer_classes=[renderers.JSONRenderer],
+    )
+    def get_detail(self, request, pk):
+        try:
+            project = Project.objects.get(pk=pk, user=request.user)
+        except Project.DoesNotExist:
+            return error_response(
+                errors=None,
+                message="Project plan with this id not found",
+                status=404,
+            )
+
+        except (ValueError, TypeError):
+            return error_response(
+                errors=None,
+                message="Invalid project id",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = ProjectDetailSerializer(project)
+
+        return success_response(
+            data=serializer.data,
+            message="Project plan details retrieved successfully",
+            status=200,
+        )
+
+    @action(
+        methods=["post"],
+        detail=False,
+        url_path="delete-multiple",
+        permission_classes=[IsUser],
+    )
+    def delete_multiple(self, request):
+        project_ids = request.data.get("ids", [])
+
+        if not project_ids:
+            return error_response(
+                errors=None,
+                message="No ID(s) provided!",
+                status=400,
+            )
+
+        projects = Project.objects.filter(id__in=project_ids)
+
+        if not projects.exists():
+            return Response(
+                {"error": "Can not found project(s) with provided ID(s)!"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        print(projects)
+        deleted_count, _ = projects.delete()
+        return success_response(
+            message=f"Deleted {deleted_count} projects(s) successfully!",
             status=200,
         )

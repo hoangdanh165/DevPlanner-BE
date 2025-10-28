@@ -20,3 +20,4 @@ class Section(models.Model):
 
     class Meta:
         db_table = "section"
+        ordering = ["order_index"]
