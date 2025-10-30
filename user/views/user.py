@@ -19,11 +19,7 @@ from django.contrib.auth.hashers import make_password
 from ..models import UserResetPassword
 from django.utils import timezone
 from ..serializers import UserSerializer, UserResetPasswordSerializer
-from ..serializers.user import (
-    UserInfoSerializer,
-    UserAccountSerializer,
-    UserProfileSerializer,
-)
+
 from ..models import User, UserResetPassword
 from ..serializers.user import StaffSerializer
 from django.db.models.functions import TruncMonth, TruncDate
@@ -31,7 +27,11 @@ from django.utils.timezone import now
 from django.db.models import Count, Q
 from core.utils.response import success_response, error_response
 
-
+from ..serializers.user import (
+    UserInfoSerializer,
+    UserAccountSerializer,
+    UserProfileSerializer,
+)
 from ..services.user import (
     verify_token,
     send_verification_email,
