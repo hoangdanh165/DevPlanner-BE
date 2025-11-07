@@ -49,7 +49,7 @@ prompt_templates = {
         ]
         }
     """,
-    "tech_stack": """
+    "techstack": """
         You are a **senior full-stack software architect**.
         Propose the most suitable technology stack for the following project.
 
@@ -153,7 +153,7 @@ prompt_templates = {
         Return the result in **Markdown** format, no extra JSON wrapping.
     """,
     "diagrams": {
-        "gantt_chart": """
+        "diagrams_gantt": """
         You are a **project planner** and **timeline visualizer**.
 
         Your task is to generate a **Mermaid Gantt chart** that visualizes the high-level schedule and dependencies of the project.
@@ -186,7 +186,7 @@ prompt_templates = {
             Task in sec      :2014-01-12  , 12d
             another task      : 24d
     """,
-        "er_diagram": """
+        "diagrams_er": """
         You are a **database architect**.
 
         Your task is to generate a **Mermaid Entity Relationship Diagram (ERD)** that clearly represents the data model of the project.
@@ -213,7 +213,7 @@ prompt_templates = {
             PROJECT ||--o{ SECTION : "contains"
             SECTION ||--o{ TASK : "includes"
     """,
-        "architecture_diagram": """
+        "diagrams_architecture": """
         You are a **software architect**.
 
         Your task is to generate a **high-level system architecture diagram** using Mermaid syntax.
@@ -246,7 +246,7 @@ prompt_templates = {
             disk1:T -- B:server
             disk2:T -- B:db
     """,
-        "sequence_diagram": """
+        "diagrams_sequence": """
         You are a **software engineer** visualizing the main user flow.
 
         Your task is to generate a **Mermaid sequence diagram** that shows the core interaction steps between key components of the system.
@@ -276,3 +276,40 @@ prompt_templates = {
     """,
     },
 }
+
+from string import Template
+from ..pipelines.context_manager import load_context
+
+
+def _get_project_attr(project, attr, default=""):
+    if isinstance(project, dict):
+        return project.get(attr) or default
+    return getattr(project, attr, default)
+
+
+def build_prompt(project, section: str) -> str:
+    project_name = _get_project_attr(project, "name")
+    description = (
+        _get_project_attr(project, "description") or "No description provided."
+    )
+    context = load_context(project)
+
+    if section == "overview":
+        template_str = prompt_templates["overview"]
+        return Template(template_str).substitute(
+            project_name=project_name,
+            description=description,
+        )
+
+    if section.startswith("diagrams"):
+        template_str = prompt_templates["diagrams"][section]
+        return Template(template_str).substitute(
+            project_name=project_name,
+            context=context,
+        )
+
+    template_str = prompt_templates[section]
+    return Template(template_str).substitute(
+        project_name=project_name,
+        context=context,
+    )

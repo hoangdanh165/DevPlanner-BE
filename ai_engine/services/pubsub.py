@@ -61,7 +61,6 @@ class ProgressPublisher:
             logger.exception("Publish failed: channel=%s payload=%s", ch, msg)
 
 
-# ---- Factory mặc định dùng Redis URL trong settings ----
 _publisher_singleton: Optional[ProgressPublisher] = None
 
 

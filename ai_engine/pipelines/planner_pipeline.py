@@ -1,14 +1,4 @@
-from .steps import (
-    generate_overview,
-    generate_tech_stack,
-    generate_features,
-    generate_tasks,
-    generate_docs,
-    generate_diagrams_gantt,
-    generate_diagrams_er,
-    generate_diagrams_architecture,
-    generate_diagrams_sequence,
-)
+from .steps import generate
 from .context_manager import load_context
 from ..services.pubsub import get_default_publisher
 
@@ -24,42 +14,49 @@ def _get_project_id_for_publish(project):
     return "unknown"
 
 
-def run_project_pipeline(project):
-    """Run each step sequentially with context carry-over.
+order_map = {
+    "overview": 1,
+    "features": 2,
+    "techstack": 3,
+    "tasks": 4,
+    "diagrams_gantt": 5,
+    "diagrams_er": 6,
+    "diagrams_architecture": 7,
+    "diagrams_sequence": 8,
+    "docs": 9,
+}
 
+
+def _get_order_index(section: str) -> int:
+    return order_map.get(section, 999)
+
+
+def run_project_pipeline(project):
+    """
+    Run each step sequentially with context carry-over.
     project can be a Django Project instance or a dict (temporary payload).
     """
     pid = _get_project_id_for_publish(project)
 
-    pubisher.publish(pid, "overview_start", None)
-    overview_text = generate_overview(project)
+    for section in order_map:
+        order_index = _get_order_index(section)
+        progress_message = section + "_start"
+        pubisher.publish(pid, progress_message, None)
+        generate(project, section=section, order_index=order_index)
 
-    pubisher.publish(pid, "features_start", None)
-    features_text = generate_features(project)
+    pubisher.publish(pid, "pipeline_complete", {"version": "v1"})
 
-    pubisher.publish(pid, "techstack_start", None)
-    techstack_text = generate_tech_stack(project)
 
-    pubisher.publish(pid, "tasks_start", None)
-    tasks_text = generate_tasks(project)
+def run_section_regeneration(project, section):
+    """
+    Regenerate a specific section of project plan
+    """
+    pid = _get_project_id_for_publish(project)
+    order_index = _get_order_index(section)
 
-    # ======== DIAGRAMS ========
+    progress_message = section + "_start"
+    pubisher.publish(pid, progress_message, None)
 
-    pubisher.publish(pid, "diagrams_gantt_start", None)
-    d_gantt_text = generate_diagrams_gantt(project)
+    new_version = generate(project, section=section, order_index=order_index)
 
-    pubisher.publish(pid, "diagrams_er_start", None)
-    d_er_text = generate_diagrams_er(project)
-
-    pubisher.publish(pid, "diagrams_architecture_start", None)
-    d_architecture_text = generate_diagrams_architecture(project)
-
-    pubisher.publish(pid, "diagrams_sequence_start", None)
-    d_sequence_text = generate_diagrams_sequence(project)
-
-    # ======== DIAGRAMS END ========
-
-    pubisher.publish(pid, "docs_start", None)
-    techstack_text = generate_docs(project)
-
-    pubisher.publish(pid, "pipeline_complete", None)
+    pubisher.publish(pid, "pipeline_complete", {"version": new_version})

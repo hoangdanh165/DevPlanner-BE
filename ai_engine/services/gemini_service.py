@@ -25,8 +25,6 @@ def generate_text(
     start = time.time()
     model = genai.GenerativeModel(model_name)
 
-    publisher.publish(project_id, f"{step}_start", None)
-
     stream = model.generate_content(
         prompt,
         stream=True,

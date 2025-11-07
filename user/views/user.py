@@ -32,11 +32,8 @@ from ..serializers.user import (
     UserAccountSerializer,
     UserProfileSerializer,
 )
-from ..services.user import (
-    verify_token,
-    send_verification_email,
-    send_password_reset_email,
-)
+from ..tasks.email import run_send_password_reset_email, run_send_verification_email
+
 from core.permissions import (
     IsAdmin,
 )
@@ -194,7 +191,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             user = serializer.save()
-            send_verification_email(user)
+            run_send_verification_email.delay(user)
 
             return success_response(
                 None,
@@ -221,12 +218,13 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if not user:
+        if user.email.strip().lower() != email.lower():
             return Response(
-                {"status": "Unauthorized!"}, status=status.HTTP_401_UNAUTHORIZED
+                {"status": "Email does not match your account."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        send_verification_email(user)
+        run_send_verification_email.delay(user.id)
 
         return Response(
             {"status": "Verification email sent, please check your email!"},
@@ -284,11 +282,11 @@ class UserViewSet(viewsets.ModelViewSet):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response(
-                {"error": "User with this email does not exist!"},
+                {"error": "User with this email does not exist"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        send_password_reset_email(user)
+        run_send_password_reset_email.delay(user.id)
         return Response(
             {"status": "Password reset link has been sent to your email"},
             status=status.HTTP_200_OK,
