@@ -57,6 +57,6 @@ def run_section_regeneration(project, section):
     progress_message = section + "_start"
     pubisher.publish(pid, progress_message, None)
 
-    new_version = generate(project, section=section, order_index=order_index)
+    _, new_version = generate(project, section=section, order_index=order_index)
 
-    pubisher.publish(pid, "pipeline_complete", {"version": new_version})
+    pubisher.publish(pid, "pipeline_complete", {"version": "v" + str(new_version)})

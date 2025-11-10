@@ -13,6 +13,8 @@ class Section(models.Model):
     content_json = models.JSONField(default=dict)
     order_index = models.IntegerField(default=0)
     generated_by_ai = models.BooleanField(default=True)
+
+    current_version = models.PositiveIntegerField(default=1)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

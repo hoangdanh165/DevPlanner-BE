@@ -19,7 +19,7 @@ class Project(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    version = models.CharField(max_length=50, default="v1")
+    version = models.PositiveIntegerField(default=1)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="draft")
     tags = models.JSONField(default=list)
     sections_json = models.JSONField(default=dict)
@@ -32,6 +32,9 @@ class Project(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.user.email})"
+
+    def get_version(self):
+        return f"v{self.version}"
 
     class Meta:
         db_table = "project"

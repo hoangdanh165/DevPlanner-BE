@@ -1,4 +1,4 @@
-from planner.models import Project, Section
+from planner.models import Project, Section, SectionVersion
 from django.core.cache import cache
 from typing import Union
 from django.db import transaction
@@ -27,17 +27,9 @@ def load_context(project: Union[Project, dict]):
 
 
 def bump_project_version(base_project: Project) -> str:
-    current = (base_project.version or "").strip()
+    current = base_project.version
 
-    if not current.lower().startswith("v"):
-        num = 1
-    else:
-        try:
-            num = int(current[1:])
-        except ValueError:
-            num = 1
-
-    new = f"v{num + 1 }"
+    new = current + 1
     base_project.version = new
     base_project.save(update_fields=["version"])
 
@@ -54,17 +46,59 @@ def save_section(
     else:
         base_project = project
 
-    _, created = Section.objects.update_or_create(
+    section, created = Section.objects.select_for_update().get_or_create(
         project=base_project,
         title=title,
         defaults={
             "order_index": order,
             "content": content,
+            "content_json": {},
+            "generated_by_ai": True,
+            "current_version": 1,
         },
     )
 
-    if not created:
-        new = bump_project_version(base_project)
-        return new
+    if created:
+        SectionVersion.objects.create(
+            project=base_project,
+            section=section,
+            project_version=base_project.version,
+            section_version=section.current_version,
+            title=section.title,
+            content=section.content,
+            content_json=section.content_json,
+            order_index=section.order_index,
+            generated_by_ai=section.generated_by_ai,
+        )
+        return base_project.version
 
-    return base_project.version
+    new_project_version = bump_project_version(base_project)
+
+    # Increase version of section
+    section.current_version = (section.current_version or 1) + 1
+    section.content = content
+    section.order_index = order
+    section.generated_by_ai = True
+    section.save(
+        update_fields=[
+            "content",
+            "order_index",
+            "generated_by_ai",
+            "current_version",
+            "updated_at",
+        ]
+    )
+
+    SectionVersion.objects.create(
+        project=base_project,
+        section=section,
+        project_version=new_project_version,
+        section_version=section.current_version,
+        title=section.title,
+        content=section.content,
+        content_json=section.content_json,
+        order_index=section.order_index,
+        generated_by_ai=section.generated_by_ai,
+    )
+
+    return new_project_version
