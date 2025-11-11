@@ -1,8 +1,10 @@
 from rest_framework import serializers
-from ..models.section import Section
+from ..models import Section, Project
 
 
 class SectionSerializer(serializers.ModelSerializer):
+    currentVersion = serializers.IntegerField(source="current_version", read_only=True)
+
     class Meta:
         model = Section
         fields = [
@@ -10,6 +12,7 @@ class SectionSerializer(serializers.ModelSerializer):
             "title",
             "content",
             "content_json",
+            "currentVersion",
             "order_index",
             "generated_by_ai",
             "updated_at",

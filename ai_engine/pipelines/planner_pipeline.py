@@ -44,7 +44,7 @@ def run_project_pipeline(project):
         pubisher.publish(pid, progress_message, None)
         generate(project, section=section, order_index=order_index)
 
-    pubisher.publish(pid, "pipeline_complete", {"version": "v1"})
+    pubisher.publish(pid, "pipeline_complete", {"version": 1})
 
 
 def run_section_regeneration(project, section):
@@ -59,4 +59,4 @@ def run_section_regeneration(project, section):
 
     _, new_version = generate(project, section=section, order_index=order_index)
 
-    pubisher.publish(pid, "pipeline_complete", {"version": "v" + str(new_version)})
+    pubisher.publish(pid, "pipeline_complete", {"version": new_version})

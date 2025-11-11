@@ -11,7 +11,11 @@ from rest_framework import status
 from django.conf import settings
 from django.utils import timezone
 from ..models import Project
-from ..serializers.project import ProjectDetailSerializer, ProjectListSerializer
+from ..serializers.project import (
+    ProjectDetailSerializer,
+    ProjectListSerializer,
+    ProjectDetailMainSerializer,
+)
 from django.db.models.functions import TruncMonth, TruncDate
 from django.utils.timezone import now
 from django.db.models import Count, Q
@@ -29,7 +33,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPaginationProject
 
     def get_queryset(self):
-        return Project.objects.filter(user=self.request.user).order_by("-created_at")
+        user = self.request.user
+        return Project.objects.filter(user=user, deleted_at__isnull=True).order_by(
+            "-updated_at"
+        )
 
     @action(
         detail=False,
@@ -39,12 +46,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
         renderer_classes=[renderers.JSONRenderer],
     )
     def get_all(self, request):
-        user = request.user
-        queryset = Project.objects.filter(user=user).order_by("-created_at")
+        queryset = self.get_queryset()
 
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
-        serializer = self.get_serializer(page, many=True)
+        serializer = ProjectListSerializer(page, many=True)
 
         meta = {
             "count": paginator.page.paginator.count,
@@ -85,6 +91,38 @@ class ProjectViewSet(viewsets.ModelViewSet):
             )
 
         serializer = ProjectDetailSerializer(project)
+
+        return success_response(
+            data=serializer.data,
+            message="Project plan details retrieved successfully",
+            status=200,
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="detail-main",
+        permission_classes=[IsAuthenticated],
+        renderer_classes=[renderers.JSONRenderer],
+    )
+    def get_detail_main(self, request, pk):
+        try:
+            project = self.get_queryset().get(pk=pk)
+        except Project.DoesNotExist:
+            return error_response(
+                errors=None,
+                message="Project plan with this id not found",
+                status=404,
+            )
+
+        except (ValueError, TypeError):
+            return error_response(
+                errors=None,
+                message="Invalid project id",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = ProjectDetailMainSerializer(project)
 
         return success_response(
             data=serializer.data,

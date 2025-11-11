@@ -28,7 +28,7 @@ def generate(project, section: str, order_index: int) -> str:
 
     version = save_section(
         project=project,
-        title=section.capitalize(),
+        title=section,
         content=text,
         order=order_index,
     )
