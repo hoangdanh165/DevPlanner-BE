@@ -10,15 +10,14 @@ from rest_framework.decorators import action
 from rest_framework import status
 from django.conf import settings
 from django.utils import timezone
-from ..models import Project
+from ..models import Project, SectionVersion
 from ..serializers.project import (
     ProjectDetailSerializer,
     ProjectListSerializer,
     ProjectDetailMainSerializer,
 )
-from django.db.models.functions import TruncMonth, TruncDate
-from django.utils.timezone import now
-from django.db.models import Count, Q
+from ..serializers.section_history import SectionVersionSerializer
+
 from core.utils.response import success_response, error_response
 
 from core.permissions import IsUser
@@ -37,6 +36,44 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Project.objects.filter(user=user, deleted_at__isnull=True).order_by(
             "-updated_at"
         )
+
+    @staticmethod
+    def _normalize_version_param(raw: str | None) -> tuple[bool, int | None]:
+        """
+        Returns (is_latest, version_int_or_None).
+        - None / "" / "latest" / "current"  -> (True, None)   (caller will fetch latest)
+        - "v3" / "3"                        -> (False, 3)
+        Raises ValueError if invalid.
+        """
+        if raw is None or raw == "":
+            return True, None
+
+        raw_l = raw.strip().lower()
+        if raw_l in {"latest", "current"}:
+            return True, None
+
+        if raw_l.startswith("v"):
+            raw_l = raw_l[1:]
+
+        # must be positive int
+        v = int(raw_l)  # may raise ValueError
+        if v <= 0:
+            raise ValueError("Version must be a positive integer.")
+        return False, v
+
+    def _resolve_version_number(
+        self, project, is_latest: bool, version_num: int | None
+    ) -> int | None:
+        """
+        If latest → return the max version that exists for this project (or None if no rows).
+        Else → return the requested version number.
+        """
+        if is_latest:
+            agg = SectionVersion.objects.filter(project=project).aggregate(
+                max_v=Max("version")
+            )
+            return agg["max_v"]
+        return version_num
 
     @action(
         detail=False,
@@ -75,7 +112,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     )
     def get_detail(self, request, pk):
         try:
-            project = Project.objects.get(pk=pk, user=request.user)
+            project = self.get_queryset().get(pk=pk)
         except Project.DoesNotExist:
             return error_response(
                 errors=None,
@@ -128,6 +165,68 @@ class ProjectViewSet(viewsets.ModelViewSet):
             data=serializer.data,
             message="Project plan details retrieved successfully",
             status=200,
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="version-history",
+        permission_classes=[IsAuthenticated],
+        renderer_classes=[renderers.JSONRenderer],
+    )
+    def get_version_history(self, request, pk=None):
+        try:
+            project = self.get_queryset().get(pk=pk)
+        except Project.DoesNotExist:
+            return error_response(
+                errors=None,
+                message="Project plan with this id not found",
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except (ValueError, TypeError):
+            return error_response(
+                errors=None,
+                message="Invalid project id",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        raw = request.query_params.get("version")
+        try:
+            is_latest, version_num = self._normalize_version_param(raw)
+        except ValueError as e:
+            return error_response(
+                errors={"version": [str(e)]},
+                message="Invalid version parameter.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        resolved_version = self._resolve_version_number(project, is_latest, version_num)
+        if resolved_version is None:
+            return error_response(
+                errors=None,
+                message="No versions exist for this project.",
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        sections_qs = SectionVersion.objects.filter(
+            project=project, section_version=resolved_version
+        ).order_by("order_index")
+
+        if not sections_qs.exists():
+            return error_response(
+                errors=None,
+                message=f"No section snapshots found for version {resolved_version}.",
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        sections_data = SectionVersionSerializer(sections_qs, many=True).data
+
+        return success_response(
+            data={
+                "sections": sections_data,
+            },
+            message="Project plan version retrieved successfully",
+            status=status.HTTP_200_OK,
         )
 
     @action(
