@@ -1,7 +1,7 @@
 import os
 import requests
 from django.shortcuts import render
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Max
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, renderers
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -16,7 +16,10 @@ from ..serializers.project import (
     ProjectListSerializer,
     ProjectDetailMainSerializer,
 )
-from ..serializers.section_history import SectionVersionSerializer
+from ..serializers.section_history import (
+    SectionVersionSerializer,
+    SectionVersionListSerializer,
+)
 
 from core.utils.response import success_response, error_response
 
@@ -145,6 +148,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def get_detail_main(self, request, pk):
         try:
             project = self.get_queryset().get(pk=pk)
+
         except Project.DoesNotExist:
             return error_response(
                 errors=None,
@@ -208,9 +212,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        sections_qs = SectionVersion.objects.filter(
-            project=project, section_version=resolved_version
-        ).order_by("order_index")
+        sections_qs = (
+            SectionVersion.objects.filter(
+                project=project, section_version=resolved_version
+            )
+            .select_related("section")
+            .order_by("order_index")
+        )
 
         if not sections_qs.exists():
             return error_response(
@@ -219,12 +227,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        sections_data = SectionVersionSerializer(sections_qs, many=True).data
+        list_serializer = SectionVersionListSerializer(child=SectionVersionSerializer())
+        sections_data = list_serializer.to_representation(sections_qs)
 
         return success_response(
-            data={
-                "sections": sections_data,
-            },
+            data=sections_data,
             message="Project plan version retrieved successfully",
             status=status.HTTP_200_OK,
         )

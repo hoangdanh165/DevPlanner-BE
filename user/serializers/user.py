@@ -7,7 +7,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
-
+from ..models.user_profile import UserProfile
 from ..models.role import Role
 
 User = get_user_model()
@@ -148,24 +148,22 @@ class UserInfoSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["full_name", "phone", "address", "avatar", "email"]
 
 
-class StaffSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = "__all__"
+
+
+class UserProfileViewSerializer(serializers.ModelSerializer):
     avatar = serializers.CharField(source="get_avatar")
-    role = serializers.CharField(source="get_role")
-    had_conversation = serializers.BooleanField()
+    profile = UserProfileSerializer(read_only=True)
 
     class Meta:
         model = User
-        fields = [
-            "id",
-            "full_name",
-            "avatar",
-            "email",
-            "role",
-            "had_conversation",
-        ]
+        fields = ["full_name", "phone", "address", "avatar", "email", "profile"]

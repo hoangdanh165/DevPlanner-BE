@@ -21,7 +21,6 @@ from django.utils import timezone
 from ..serializers import UserSerializer, UserResetPasswordSerializer
 
 from ..models import User, UserResetPassword
-from ..serializers.user import StaffSerializer
 from django.db.models.functions import TruncMonth, TruncDate
 from django.utils.timezone import now
 from django.db.models import Count, Q
@@ -30,7 +29,8 @@ from core.utils.response import success_response, error_response
 from ..serializers.user import (
     UserInfoSerializer,
     UserAccountSerializer,
-    UserProfileSerializer,
+    UserProfileUpdateSerializer,
+    UserProfileViewSerializer,
 )
 from ..tasks.email import run_send_password_reset_email, run_send_verification_email
 
@@ -167,7 +167,7 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             user_data["avatar"] = request.data.get("avatar")
 
-        serializer = UserProfileSerializer(user, data=user_data, partial=True)
+        serializer = UserProfileUpdateSerializer(user, data=user_data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -868,3 +868,20 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(users, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        methods=["get"],
+        url_path="profile",
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        renderer_classes=[renderers.JSONRenderer],
+    )
+    def get_profile(self, request):
+        user = request.user
+        serializer = UserProfileViewSerializer(user, context={"request": request})
+
+        return success_response(
+            data=serializer.data,
+            message="User profile retrieved successfully",
+            status=status.HTTP_200_OK,
+        )

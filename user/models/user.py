@@ -16,7 +16,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     google_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     github_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
-    
+
     full_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255, unique=True)
     phone = models.CharField(max_length=20, null=True, blank=True)
@@ -70,7 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.get_status_display()
 
     def get_avatar(self):
-        if self.google_id:
+        if self.google_id or self.github_id:
             return self.avatar_url
         else:
             if self.avatar:
