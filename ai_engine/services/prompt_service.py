@@ -111,10 +111,15 @@ prompt_templates = {
         {
             "milestones": [
                 {
-                "name": "MVP Setup",
-                "tasks": [
-                    { "title": "", "description": "", "role": "", "priority": "" }
-                ]
+                    "name": "MVP Setup",
+                    "tasks": [
+                        { 
+                            "title": "", 
+                            "description": "", 
+                            "role": "", 
+                            "priority": "" 
+                        }
+                    ]
                 }
             ]
         }

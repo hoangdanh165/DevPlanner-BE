@@ -191,15 +191,19 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             user = serializer.save()
-            run_send_verification_email.delay(user)
+            run_send_verification_email.delay(user.id)
 
             return success_response(
                 None,
                 "Account created successfully, please check your email!",
-                status=201,
+                status=status.HTTP_201_CREATED,
             )
 
-        return error_response("Validation failed", errors=serializer.errors)
+        return error_response(
+            errors=serializer.errors,
+            message="Validation failed",
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     @action(
         methods=["post"],

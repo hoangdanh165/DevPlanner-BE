@@ -7,14 +7,8 @@ def success_response(
     status=200,
     meta=None,
 ):
-    """
-    Chuẩn hóa format API response cho toàn hệ thống.
-    - data: dữ liệu chính (list, dict, ...).
-    - meta: thông tin phụ (pagination, filters, stats...).
-    """
     response_data = {
         "success": True,
-        "code": status,
         "message": message,
         "data": data,
     }
@@ -26,14 +20,12 @@ def success_response(
 
 
 def error_response(errors=None, message="Error", status=400):
-    return Response(
-        {
-            "error": {
-                "code": status,
-                "message": message,
-                "details": {
-                    "data": errors,
-                },
-            }
+    response_data = {
+        "error": {
+            "message": message,
+            "details": {
+                "data": errors,
+            },
         }
-    )
+    }
+    return Response(data=response_data, status=status)
