@@ -23,9 +23,9 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(",")
 
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(",")
 
-SECURE_SSL_REDIRECT = bool(os.environ.get("SECURE_SSL_REDIRECT", "True"))
+SECURE_SSL_REDIRECT = bool(os.environ.get("SECURE_SSL_REDIRECT", "False"))
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "http")
 
 FE_HOST = os.environ.get("FE_HOST", "http://localhost:3000")
 
@@ -277,8 +277,8 @@ REDIS_EXTERNAL_URL = os.environ.get("REDIS_EXTERNAL_URL")
 ENVIRONMENT = os.environ.get("ENVIRONMENT")
 
 # Set REDIS_URL based on ENVIRONMENT
-# REDIS_URL = REDIS_INTERNAL_URL if ENVIRONMENT == "production" else REDIS_EXTERNAL_URL
-REDIS_URL = os.environ.get("REDIS_EXTERNAL_URL")
+REDIS_URL = REDIS_INTERNAL_URL if ENVIRONMENT == "production" else REDIS_EXTERNAL_URL
+# REDIS_URL = os.environ.get("REDIS_EXTERNAL_URL")
 
 
 CACHES = {
@@ -355,8 +355,8 @@ LOGGING = {
 ACCOUNT_EMAIL_REQUIRED = True
 
 # CELERY SETTINGS
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/3")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/3")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/3")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/3")
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Ho_Chi_Minh"
