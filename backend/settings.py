@@ -17,18 +17,41 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 DEBUG = bool(os.environ.get("DEBUG"))
 
+if DEBUG:
+    # Do not force HTTPS in development (allow plain HTTP)
+    SECURE_SSL_REDIRECT = False
+
+    # Allow cookies to be sent over HTTP (not only HTTPS)
+    SESSION_COOKIE_SECURE = False
+
+    # Allow CSRF cookies to work over HTTP
+    CSRF_COOKIE_SECURE = False
+
+    # No real proxy SSL handling in dev (not using a reverse proxy)
+    SECURE_PROXY_SSL_HEADER = None
+else:
+    # Force redirect all HTTP requests to HTTPS in production
+    SECURE_SSL_REDIRECT = True
+
+    # Only send session cookies over secure HTTPS connections
+    SESSION_COOKIE_SECURE = True
+
+    # Only send CSRF cookies over secure HTTPS connections
+    CSRF_COOKIE_SECURE = True
+
+    # Tell Django the request is secure when coming through an HTTPS proxy (e.g., Nginx / Load Balancer)
+    SECURE_PROXY_SSL_HEADER = "https"
+
+
+# DEFAULT SETTINGS
 DEFAULT_HOST = os.environ.get("DEFAULT_HOST")
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(",")
 
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(",")
 
-SECURE_SSL_REDIRECT = bool(os.environ.get("SECURE_SSL_REDIRECT", "False"))
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "http")
-
-FE_HOST = os.environ.get("FE_HOST", "http://localhost:3000")
-
+# CORS SETTINGS
 CORS_ALLOW_CREDENTIALS = bool(os.environ.get("CORS_ALLOW_CREDENTIALS"))
 
 CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS").split(",")
@@ -40,6 +63,10 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 ]
 
 CORS_EXPOSE_HEADERS = ["Cross-Origin-Opener-Policy"]
+
+
+# OTHERS
+FE_HOST = os.environ.get("FE_HOST", "http://localhost:3000")
 
 INSTALLED_APPS = [
     "corsheaders",
