@@ -52,7 +52,7 @@ CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(",")
 
 
 # CORS SETTINGS
-CORS_ALLOW_CREDENTIALS = bool(os.environ.get("CORS_ALLOW_CREDENTIALS"))
+CORS_ALLOW_CREDENTIALS = bool(os.environ.get("CORS_ALLOW_CREDENTIALS", "False"))
 
 CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS").split(",")
 
@@ -168,6 +168,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+# GIT
+ACCOUNT_EMAIL_REQUIRED = True
 GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", "")
 GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "")
 
@@ -311,7 +314,7 @@ REDIS_URL = REDIS_INTERNAL_URL if ENVIRONMENT == "production" else REDIS_EXTERNA
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get("REDIS_EXTERNAL_URL", "redis://localhost:6379/1"),
+        "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             # "CONNECTION_POOL_KWARGS": {
@@ -335,18 +338,15 @@ LOGGING = {
         "simple": {"format": "[{levelname}] {message}", "style": "{"},
     },
     "handlers": {
-        # Ghi log ra console (dùng khi debug, docker, gunicorn...)
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        # Ghi log ra file
         "file": {
             "class": "logging.FileHandler",
             "filename": os.path.join(BASE_DIR, "logs/django.log"),
             "formatter": "verbose",
         },
-        # Ghi log lỗi riêng
         "error_file": {
             "class": "logging.FileHandler",
             "filename": os.path.join(BASE_DIR, "logs/errors.log"),
@@ -354,7 +354,7 @@ LOGGING = {
             "level": "ERROR",
         },
     },
-    "root": {  # logger gốc cho toàn project
+    "root": {  
         "handlers": ["console", "file", "error_file"],
         "level": "DEBUG" if os.environ.get("DEBUG", "True") == "True" else "INFO",
     },
@@ -369,7 +369,6 @@ LOGGING = {
             "level": "ERROR",
             "propagate": False,
         },
-        # logger cho app riêng (vd: ai_engine)
         "ai_engine": {
             "handlers": ["console", "file"],
             "level": "DEBUG",
@@ -378,8 +377,6 @@ LOGGING = {
     },
 }
 
-# GIT
-ACCOUNT_EMAIL_REQUIRED = True
 
 # CELERY SETTINGS
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/3")
@@ -391,7 +388,7 @@ CELERY_ENABLE_UTC = False
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
+
 # Pub/Sub settings
 REDIS_PS_URL = os.getenv("REDIS_PS_URL", "redis://localhost:6379/2")
-
 UPLOAD_PROGRESS_CHANNEL_PREFIX = "project:"
