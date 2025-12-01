@@ -332,50 +332,43 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": ("[{levelname}] {asctime} | {name}:{lineno} | {message}"),
+            "format": "[{levelname}] {asctime} | {name}:{lineno} | {message}",
             "style": "{",
         },
-        "simple": {"format": "[{levelname}] {message}", "style": "{"},
+        "simple": {
+            "format": "[{levelname}] {message}",
+            "style": "{",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        "file": {
-            "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs/django.log"),
-            "formatter": "verbose",
-        },
-        "error_file": {
-            "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs/errors.log"),
-            "formatter": "verbose",
-            "level": "ERROR",
-        },
     },
-    "root": {  
-        "handlers": ["console", "file", "error_file"],
+    "root": {
+        "handlers": ["console"],
         "level": "DEBUG" if os.environ.get("DEBUG", "True") == "True" else "INFO",
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "level": "INFO",
             "propagate": True,
         },
         "django.request": {
-            "handlers": ["console", "error_file"],
+            "handlers": ["console"],
             "level": "ERROR",
             "propagate": False,
         },
         "ai_engine": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,
         },
     },
 }
+
 
 
 # CELERY SETTINGS
