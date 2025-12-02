@@ -524,8 +524,8 @@ class UserViewSet(viewsets.ModelViewSet):
                     key="refreshToken",
                     value=refresh_token,
                     httponly=True,
-                    secure=True,  # True if Production mode is on
-                    samesite="None",
+                    secure=False,
+                    samesite="Lax",
                     max_age=24 * 60 * 60,
                 )
                 return response
@@ -618,8 +618,8 @@ class UserViewSet(viewsets.ModelViewSet):
             key="refreshToken",
             value=refresh_token,
             httponly=True,
-            secure=True,
-            samesite="None",
+            secure=False,
+            samesite="Lax",
             max_age=24 * 60 * 60,
         )
 
@@ -638,9 +638,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if not code:
             return Response({"error": "Missing authorization code"}, status=400)
 
-        # ==============================
-        # 1️⃣ Exchange code for access_token
-        # ==============================
         token_url = "https://github.com/login/oauth/access_token"
         payload = {
             "client_id": settings.GITHUB_CLIENT_ID,
@@ -659,9 +656,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if not access_token:
             return Response({"error": "Invalid access token response"}, status=400)
 
-        # ==============================
-        # 2️⃣ Get GitHub user info
-        # ==============================
         user_info_url = "https://api.github.com/user"
         email_info_url = "https://api.github.com/user/emails"
 
@@ -672,7 +666,6 @@ class UserViewSet(viewsets.ModelViewSet):
             email_info_url, headers={"Authorization": f"Bearer {access_token}"}
         ).json()
 
-        # Lấy email chính xác (verified hoặc primary)
         primary_email = None
         if isinstance(email_info, list):
             for item in email_info:
@@ -680,7 +673,6 @@ class UserViewSet(viewsets.ModelViewSet):
                     primary_email = item.get("email")
                     break
 
-        # Lấy thông tin cơ bản
         github_id = user_info.get("id")
         username = user_info.get("login")
         avatar = user_info.get("avatar_url")
@@ -690,9 +682,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if not email:
             return Response({"error": "Email not available from GitHub"}, status=400)
 
-        # # ==============================
-        # # 5️⃣ Get user repositories
-        # # ==============================
+
         # repos_url = "https://api.github.com/user/repos?per_page=50&sort=updated"
         # repos_response = requests.get(
         #     repos_url, headers={"Authorization": f"Bearer {access_token}"}
@@ -703,7 +693,6 @@ class UserViewSet(viewsets.ModelViewSet):
         # else:
         #     repos_data = []
 
-        # # Chọn các trường cần thiết để lưu/gợi ý
         # user_repos = []
         # for repo in repos_data:
         #     user_repos.append(
@@ -721,9 +710,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         # print("User Repos:", user_repos)
         # TO-DO: Save user repos's information to database or suggest ideas based on these recent repos
-        # ==============================
-        # 3️⃣ Create or update user
-        # ==============================
+
         user = User.objects.filter(github_id=github_id).first()
 
         if user:
@@ -747,9 +734,6 @@ class UserViewSet(viewsets.ModelViewSet):
                 user.email_verified = True
                 user.save()
 
-        # ==============================
-        # 4️⃣ Issue JWT tokens
-        # ==============================
         refresh = RefreshToken.for_user(user)
         access_token_jwt = str(refresh.access_token)
         refresh_token_jwt = str(refresh)
@@ -772,8 +756,8 @@ class UserViewSet(viewsets.ModelViewSet):
             key="refreshToken",
             value=refresh_token_jwt,
             httponly=True,
-            secure=True,
-            samesite="None",
+            secure=False,
+            samesite="Lax",
             max_age=24 * 60 * 60,
         )
 

@@ -31,13 +31,28 @@ if DEBUG:
     SECURE_PROXY_SSL_HEADER = None
 else:
     # Force redirect all HTTP requests to HTTPS in production
-    SECURE_SSL_REDIRECT = True
+    # SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False
 
     # Only send session cookies over secure HTTPS connections
-    SESSION_COOKIE_SECURE = True
+    # SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = False # Temporarily disabled because the web is deployed on HTTP
 
     # Only send CSRF cookies over secure HTTPS connections
-    CSRF_COOKIE_SECURE = True
+    # CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = False # Temporarily disabled because the web is deployed on HTTP
+
+    # SESSION_COOKIE_DOMAIN = None
+    SESSION_COOKIE_DOMAIN = None
+    
+    # CSRF_COOKIE_DOMAIN = None
+    CSRF_COOKIE_DOMAIN = None
+
+    # SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SAMESITE = "Lax"
+    
+    # CSRF_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SAMESITE = "Lax"
 
     # Tell Django the request is secure when coming through an HTTPS proxy (e.g., Nginx / Load Balancer)
     SECURE_PROXY_SSL_HEADER = "https"
