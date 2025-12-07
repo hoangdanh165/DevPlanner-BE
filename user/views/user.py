@@ -19,7 +19,7 @@ from django.contrib.auth.hashers import make_password
 from ..models import UserResetPassword
 from django.utils import timezone
 from ..serializers import UserSerializer, UserResetPasswordSerializer
-
+from ..services.user import verify_token
 from ..models import User, UserResetPassword
 from django.db.models.functions import TruncMonth, TruncDate
 from django.utils.timezone import now
